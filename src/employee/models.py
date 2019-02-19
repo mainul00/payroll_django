@@ -19,9 +19,23 @@ class Department(models.Model):
         return self.dept_name
 
 
-class DeptEmp(models.Model):
+class Designation(models.Model):
+    designation_no = models.CharField(_('designation_no'), primary_key=True, max_length=4)
+    designation_name = models.CharField(_('designation_name'), unique=True, max_length=40)
+
+    class Meta:
+        verbose_name = _('designation')
+        verbose_name_plural = _('designations')
+        db_table = 'designations'
+        ordering = ['designation_no']
+
+    def __str__(self):
+        return self.designation_name
+
+class DepartmentEmployee(models.Model):
     employee = models.ForeignKey('Employee', on_delete=models.CASCADE, db_column='emp_no', verbose_name=_('employee'))
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, db_column='dept_no', verbose_name=_('department'))
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, db_column='dept_no', verbose_name=_('department'))
+
 
     class Meta:
         verbose_name = _('department employee')
@@ -49,30 +63,19 @@ class Employee(models.Model):
         return "{} {}".format(self.first_name, self.last_name)
 
 
-# class Grade(models.Model):
-# 	grade_no  			= models.CharField(_('code'), primary_key=True, max_length=4)
-#     # grad_name 			= models.CharField(_('name'), unique=True, max_length=40)
-#     basic_salary 		= models.IntegerField()
-#     medical_allowance 	= models.IntegerField()
-#     lunch_allowance 	= models.IntegerField()
-#     transport_bill  	= models.IntegerField()
-#     net_salary 			= models.IntegerField()
-#     class Meta:
-#     	verbose_name = _('grade')
-#         verbose_name_plural = _('grades')
-#         db_table = 'grade'
-
-
 class Grade(models.Model):
 	grade_no = models.CharField(max_length=10,primary_key=True)
 	basic_salary = models.IntegerField()
 	medical_allowance = models.IntegerField()
 	lunch_allowance = models.IntegerField()
+	
 	class Meta:
 		verbose_name = _('grade')
 		verbose_name_plural= _('grades')
 		db_table = 'grades'
 
+	def __str__(self):
+		return "{}".format(self.basic_salary)
 
 
 class Salary(models.Model):
@@ -80,6 +83,13 @@ class Salary(models.Model):
     grade    = models.ForeignKey(Grade, on_delete=models.CASCADE, db_column='grade_no', verbose_name=_('grade'))
     from_date = models.DateField(_('from'))
     to_date = models.DateField(_('to'))
+
+
+ #    def net_salary(basic_salary,medical_allowance,lunch_allowance):
+	# 	 wages = basic_salary + medical_allowance + lunch_allowance
+	# 	 return wages
+	# wages = models.IntegerField()
+	
     class Meta:
         db_table = 'salaries'
         ordering = ['-from_date']
@@ -87,15 +97,15 @@ class Salary(models.Model):
         verbose_name_plural = _('salaries')
 
     def __str__(self):
-        return "{} - {}".format(self.employee, self.salary)
+        return "{} - {}".format(self.employee, self.grade)
+
 
 
 
 class EmployeeDesignation(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, db_column='emp_no', verbose_name=_('employee'))
-    title = models.CharField(_('title'), max_length=50)
-    from_date = models.DateField(_('from'))
-    to_date = models.DateField(_('to'), blank=True, null=True)
+    employee    = models.ForeignKey(Employee, on_delete=models.CASCADE, db_column='emp_no', verbose_name=_('employee'))
+    designation = models.ForeignKey(Designation, on_delete=models.CASCADE, db_column='designation_no', verbose_name=_('designation'))
+
 
     class Meta:
         verbose_name = _('employeedesignation')
@@ -104,6 +114,8 @@ class EmployeeDesignation(models.Model):
 
     def __str__(self):
         return "{} - {}".format(self.employee, self.title)
+
+
 
 # class DeptManager(models.Model):
 #     employee = models.ForeignKey('Employee', on_delete=models.CASCADE, db_column='emp_no', verbose_name=_('employee'))
